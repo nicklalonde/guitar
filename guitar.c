@@ -68,28 +68,34 @@ int note_to_int(char *input) { // converts the string note into the proper integ
     }
     return -1;
 }
-
-int get_root() { // gets the root note of the scale from the user. 
+int get_root() { 
     int valid = 0;
-    char user_note[3];
+    char input_buffer[20]; 
     int note_val;
     
     while(!valid) {
-        printf("\nEnter a root note (or q to quit)> ");
-        scanf("%2s", user_note);
+        printf("\nEnter a root note ('C', 'C#', 'D', . . .) ('q' to quit)> ");
         
-        if (user_note[0] == 'q' || user_note[0] == 'Q') {
-            return -1; // return -1 to quit program.
-        }
+        if (fgets(input_buffer, sizeof(input_buffer), stdin) != NULL) {
+            
+            input_buffer[strcspn(input_buffer, "\n")] = 0;
 
-        note_val = note_to_int(user_note);
-        
-        if(note_val == -1) {
-            printf("Invalid input! Try again.\n");
-            continue;
-        }
+            if (input_buffer[0] == 'q' || input_buffer[0] == 'Q') { // user quits.
+                return -1; 
+            }
 
-        valid = 1;
+            note_val = note_to_int(input_buffer);
+            
+            if(note_val == -1) {
+                printf("Invalid input! Try again.\n");
+                continue; // skips the rest of the loop and prompts them again
+            }
+
+            valid = 1; // input was good.
+        }
+        else {
+            printf("Error reading input.\n");
+        }
     }
     return note_val;
 }
@@ -138,43 +144,48 @@ int get_scale(char *scale) { // returns the mask for the scale.
     int valid = 0;
     char user_scale[2];
     int mask = -1;
+    char input_buffer[100];
     while (!valid) {
         scale_selection();
-        scanf("%1d", &mask);
-        
-        switch(mask) {
-            case 1:
-                mask = MAJOR_SCALE;
-                strcpy(scale, "Major Scale");
-                valid = 1;
-                break;
-            case 2:
-                mask = NATURAL_MINOR;
-                strcpy(scale, "Natural Minor Scale");
-                valid = 1;
-                break;
-            case 3:
-                mask = PENTATONIC_MAJOR;
-                strcpy(scale, "Pentatonic Major Scale");
-                valid = 1;
-                break;
-            case 4:
-                mask = PENTATONIC_MINOR;
-                strcpy(scale, "Pentatonic Minor Scale");
-                valid = 1;
-                break;
-            case 5:
-                mask = BLUES_SCALE;
-                strcpy(scale, "Blues Scale");
-                valid = 1;
-                break;
-            case 6:
-                mask = HARMONIC_MINOR;
-                strcpy(scale, "Harmonic Minor Scale");
-                valid =1;
-                break;
-            default:
-                printf("Invalid selection.\n");
+        if (fgets(input_buffer, sizeof(input_buffer), stdin) != NULL) {
+            if (sscanf(input_buffer, "%d", &mask) == 1) {
+                switch(mask) {
+                    case 1:
+                        mask = MAJOR_SCALE;
+                        strcpy(scale, "Major Scale");
+                        valid = 1;
+                        break;
+                    case 2:
+                        mask = NATURAL_MINOR;
+                        strcpy(scale, "Natural Minor Scale");
+                        valid = 1;
+                        break;
+                    case 3:
+                        mask = PENTATONIC_MAJOR;
+                        strcpy(scale, "Pentatonic Major Scale");
+                        valid = 1;
+                        break;
+                    case 4:
+                        mask = PENTATONIC_MINOR;
+                        strcpy(scale, "Pentatonic Minor Scale");
+                        valid = 1;
+                        break;
+                    case 5:
+                        mask = BLUES_SCALE;
+                        strcpy(scale, "Blues Scale");
+                        valid = 1;
+                        break;
+                    case 6:
+                        mask = HARMONIC_MINOR;
+                        strcpy(scale, "Harmonic Minor Scale");
+                        valid = 1;
+                        break;
+                    default:
+                        printf("Invalid selection. Please enter a number between 1 and 6.\n");
+                }
+            } else {
+                printf("Invalid input. Please enter a number.\n");
+            }
         }
     }
     return mask;

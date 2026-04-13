@@ -43,7 +43,7 @@ void load_notes(struct Guitar *guitar) { // loads note integer values into array
     for (int i = 0; i < STRINGS; i++) {
         for (int j = 0; j < FRETS; j++) {
             int index = (i * FRETS) + j; // calculates the 1D index
-            guitar->data[index] = (tuning[i] + j) % 12;
+            guitar->data[index] = (tuning[i] + j) % 12; // creates a 1D array of all notes as int vals.
         }
     }
 }
@@ -200,15 +200,43 @@ void display_scale_fretboard(struct Guitar *g, int root, int mask, char *scale, 
         printf("\n\n"); 
     }
 }
+void bubble_sort(int *scale_notes, int num_notes) {
+    if (scale_notes == NULL || num_notes <= 0) return;
 
-void print_scale_notes(int *scale_notes) {
-    int sz = 0;
-    for (int i = 0; i < NOTES ; i++ ) {
-        if(scale_notes[i] == -1) break;
-        printf("%s ", notes[scale_notes[i]]);
-
+    for (int i = 0; i < num_notes - 1; i++) {
+        for (int j = 0; j < num_notes - i - 1; j++) {
+            if (scale_notes[j] > scale_notes[j + 1]) {
+                // Swap the adjacent notes
+                int temp = scale_notes[j];
+                scale_notes[j] = scale_notes[j + 1];
+                scale_notes[j + 1] = temp;
+            }
+        }
     }
-  
+    // Print the sorted scale
+    for (int i = 0; i < num_notes; i++) {
+        printf("%d ", scale_notes[i]);
+    }
+    printf("\n");
+}
+
+
+
+void print_scale_notes(int root, int mask) {
+    printf("Notes: ");
+
+    // check all 12 chromatic intervals starting from the root
+    for (int i = 0; i < NOTES; i++) {
+        
+        // Start at root, add the current interval step, and wrap around 12
+        int current_note = (root + i) % NOTES;
+
+        // use bitmask logic to see if this note belongs in the scale
+        if (is_note_in_scale(current_note, root, mask)) {
+            printf("%s ", notes[current_note]);
+        }
+    }
+    printf("\n");
 }
 int main() {
     int curr_root;
@@ -217,7 +245,6 @@ int main() {
     struct Guitar *guitar = create_guitar();
     if(guitar == NULL) return 1;
     load_notes(guitar);
-    //print_notes(guitar);
     printf("Welcome to my guitar application.\n");
     while(1) {
         int root = get_root();
@@ -225,7 +252,7 @@ int main() {
         int mask = get_scale(scale);
         populate_scale_notes(root, mask, scale_notes);
         display_scale_fretboard(guitar, root, mask, scale, scale_notes);
-        print_scale_notes(scale_notes);
+        print_scale_notes(root, mask);
     }
     free(guitar->data);
     free(guitar);
